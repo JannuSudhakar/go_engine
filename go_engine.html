@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>go-cflake</title>
+  </head>
+
+  <body>
+    <canvas id="theBoard" style="background-color:gray; border:1px solid; display:block; margin:auto;"></canvas>
+
+    <script>
+      function drawBoard(){
+        //g = document.getElementsByTagName('body')[0];
+        var c = document.getElementById("theBoard");
+        var h = window.innerHeight;//g.clientHeight;
+        var w = window.innerWidth;//g.clientWidth;
+        var dim = Math.min(h,w) - 20;
+        c.height = dim;
+        c.width = dim;
+        for(var i = 0; i < 19; i++){
+          ctx = c.getContext("2d");
+          p = Math.round(dim/20*(i+1));
+          strt = Math.round(dim/20);
+          end = Math.round(19*dim/20);
+          ctx.moveTo(strt,p);
+          ctx.lineTo(end,p);
+          ctx.stroke();
+          ctx.moveTo(p,strt);
+          ctx.lineTo(p,end);
+          ctx.stroke();
+          ctx.strokeText(String(i+1),5,p);
+          ctx.strokeText(String.fromCharCode(i+65),p,15)
+        }
+      }
+      drawBoard();
+      window.addEventListener("resize",drawBoard);
+    </script>
+  </body>
+</html>
