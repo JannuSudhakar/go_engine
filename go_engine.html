@@ -7,34 +7,321 @@
   </head>
 
   <body>
-    <canvas id="theBoard" style="background-color:gray; border:1px solid; display:block; margin:auto;"></canvas>
+    <div id="theBoard" style="background-color:gray; border:1px solid; margin:auto; position:relative"></div>
 
     <script>
-      function drawBoard(){
-        //g = document.getElementsByTagName('body')[0];
-        var c = document.getElementById("theBoard");
-        var h = window.innerHeight;//g.clientHeight;
-        var w = window.innerWidth;//g.clientWidth;
-        var dim = Math.min(h,w) - 20;
-        c.height = dim;
-        c.width = dim;
-        for(var i = 0; i < 19; i++){
-          ctx = c.getContext("2d");
-          p = Math.round(dim/20*(i+1));
-          strt = Math.round(dim/20);
-          end = Math.round(19*dim/20);
-          ctx.moveTo(strt,p);
-          ctx.lineTo(end,p);
-          ctx.stroke();
-          ctx.moveTo(p,strt);
-          ctx.lineTo(p,end);
-          ctx.stroke();
-          ctx.strokeText(String(i+1),5,p);
-          ctx.strokeText(String.fromCharCode(i+65),p,15)
+      var whoseMove = "black";
+      var boardPosition = []
+      for (var i = 0; i < 19; i ++){
+        boardPosition.push([]);
+        for (var j = 0; j < 19; j ++){
+          boardPosition[i].push("gray");
         }
+      }
+      function createShapes(){
+        boardDiv = document.getElementById("theBoard");
+        for(var i = 0; i < 19; i++){
+          var line1 = document.createElementNS("http://www.w3.org/2000/svg","svg");
+          var element = document.createElementNS("http://www.w3.org/2000/svg","line");
+          element.setAttributeNS(null,"x1",0);
+          element.setAttributeNS(null,"y1",0);
+          element.setAttributeNS(null,"x2",0);
+          element.setAttributeNS(null,"y2",0);
+          //element.setAttributeNS(null,"stroke-width",2);
+          element.setAttributeNS(null,"stroke","black");
+          line1.appendChild(element);
+          line1.id = "vertical" + i.toString();
+          line1.style.position = "absolute";
+          line1.style.top = 0;
+          line1.style.left = 0;
+          boardDiv.append(line1);
+          var line2 = document.createElementNS("http://www.w3.org/2000/svg","svg");
+          var element = document.createElementNS("http://www.w3.org/2000/svg","line");
+          element.setAttributeNS(null,"x1",0);
+          element.setAttributeNS(null,"y1",0);
+          element.setAttributeNS(null,"x2",0);
+          element.setAttributeNS(null,"y2",0);
+          //element.setAttributeNS(null,"stroke-width",2);
+          element.setAttributeNS(null,"stroke","black");
+          line2.appendChild(element);
+          line2.id = "horizontal" + i.toString();
+          line2.style.position = "absolute";
+          line2.style.top = 0;
+          line2.style.left = 0;
+          boardDiv.append(line2);
+        }
+
+        var starpoint1 = document.createElementNS("http://www.w3.org/2000/svg","svg");
+        var point1 = document.createElementNS("http://www.w3.org/2000/svg","circle");
+        point1.setAttributeNS(null,"cx",3);
+        point1.setAttributeNS(null,"cy",3);
+        point1.setAttributeNS(null,"r",3);
+        point1.setAttributeNS(null,"fill","black");
+        starpoint1.append(point1);
+        starpoint1.style.position = "absolute";
+        starpoint1.style.height = "4px";
+        starpoint1.style.width = "4px"
+        starpoint1.id = "star4x4";
+
+        var starpoint2 = document.createElementNS("http://www.w3.org/2000/svg","svg");
+        var point2 = document.createElementNS("http://www.w3.org/2000/svg","circle");
+        point2.setAttributeNS(null,"cx",3);
+        point2.setAttributeNS(null,"cy",3);
+        point2.setAttributeNS(null,"r",3);
+        point2.setAttributeNS(null,"fill","black");
+        starpoint2.append(point2);
+        starpoint2.style.position = "absolute";
+        starpoint2.style.height = "4px";
+        starpoint2.style.width = "4px"
+        starpoint2.id = "star10x4";
+
+        var starpoint3 = document.createElementNS("http://www.w3.org/2000/svg","svg");
+        var point3 = document.createElementNS("http://www.w3.org/2000/svg","circle");
+        point3.setAttributeNS(null,"cx",3);
+        point3.setAttributeNS(null,"cy",3);
+        point3.setAttributeNS(null,"r",3);
+        point3.setAttributeNS(null,"fill","black");
+        starpoint3.append(point3);
+        starpoint3.style.position = "absolute";
+        starpoint3.style.height = "4px";
+        starpoint3.style.width = "4px"
+        starpoint3.id = "star16x4";
+
+        var starpoint4 = document.createElementNS("http://www.w3.org/2000/svg","svg");
+        var point4 = document.createElementNS("http://www.w3.org/2000/svg","circle");
+        point4.setAttributeNS(null,"cx",3);
+        point4.setAttributeNS(null,"cy",3);
+        point4.setAttributeNS(null,"r",3);
+        point4.setAttributeNS(null,"fill","black");
+        starpoint4.append(point4);
+        starpoint4.style.position = "absolute";
+        starpoint4.style.height = "4px";
+        starpoint4.style.width = "4px"
+        starpoint4.id = "star4x10";
+
+        var starpoint5 = document.createElementNS("http://www.w3.org/2000/svg","svg");
+        var point5 = document.createElementNS("http://www.w3.org/2000/svg","circle");
+        point5.setAttributeNS(null,"cx",3);
+        point5.setAttributeNS(null,"cy",3);
+        point5.setAttributeNS(null,"r",3);
+        point5.setAttributeNS(null,"fill","black");
+        starpoint5.append(point5);
+        starpoint5.style.position = "absolute";
+        starpoint5.style.height = "4px";
+        starpoint5.style.width = "4px"
+        starpoint5.id = "star10x10";
+
+        var starpoint6 = document.createElementNS("http://www.w3.org/2000/svg","svg");
+        var point6 = document.createElementNS("http://www.w3.org/2000/svg","circle");
+        point6.setAttributeNS(null,"cx",3);
+        point6.setAttributeNS(null,"cy",3);
+        point6.setAttributeNS(null,"r",3);
+        point6.setAttributeNS(null,"fill","black");
+        starpoint6.append(point6);
+        starpoint6.style.position = "absolute";
+        starpoint6.style.height = "4px";
+        starpoint6.style.width = "4px"
+        starpoint6.id = "star16x10";
+
+        var starpoint7 = document.createElementNS("http://www.w3.org/2000/svg","svg");
+        var point7 = document.createElementNS("http://www.w3.org/2000/svg","circle");
+        point7.setAttributeNS(null,"cx",3);
+        point7.setAttributeNS(null,"cy",3);
+        point7.setAttributeNS(null,"r",3);
+        point7.setAttributeNS(null,"fill","black");
+        starpoint7.append(point7);
+        starpoint7.style.position = "absolute";
+        starpoint7.style.height = "4px";
+        starpoint7.style.width = "4px"
+        starpoint7.id = "star4x16";
+
+        var starpoint8 = document.createElementNS("http://www.w3.org/2000/svg","svg");
+        var point8 = document.createElementNS("http://www.w3.org/2000/svg","circle");
+        point8.setAttributeNS(null,"cx",3);
+        point8.setAttributeNS(null,"cy",3);
+        point8.setAttributeNS(null,"r",3);
+        point8.setAttributeNS(null,"fill","black");
+        starpoint8.append(point8);
+        starpoint8.style.position = "absolute";
+        starpoint8.style.height = "4px";
+        starpoint8.style.width = "4px"
+        starpoint8.id = "star10x16";
+
+        var starpoint9 = document.createElementNS("http://www.w3.org/2000/svg","svg");
+        var point9 = document.createElementNS("http://www.w3.org/2000/svg","circle");
+        point9.setAttributeNS(null,"cx",3);
+        point9.setAttributeNS(null,"cy",3);
+        point9.setAttributeNS(null,"r",3);
+        point9.setAttributeNS(null,"fill","black");
+        starpoint9.append(point9);
+        starpoint9.style.position = "absolute";
+        starpoint9.style.height = "4px";
+        starpoint9.style.width = "4px"
+        starpoint9.id = "star16x16";
+
+        boardDiv.appendChild(starpoint1);
+        boardDiv.appendChild(starpoint2);
+        boardDiv.appendChild(starpoint3);
+        boardDiv.appendChild(starpoint4);
+        boardDiv.appendChild(starpoint5);
+        boardDiv.appendChild(starpoint6);
+        boardDiv.appendChild(starpoint7);
+        boardDiv.appendChild(starpoint8);
+        boardDiv.appendChild(starpoint9);
+
+        for(var i = 0; i < 19; i++){
+          for(var j = 0; j < 19; j++){
+            var circle = document.createElementNS("http://www.w3.org/2000/svg","svg");
+            var element = document.createElementNS("http://www.w3.org/2000/svg","circle");
+            element.setAttributeNS(null,"cx",0);
+            element.setAttributeNS(null,"cy",0);
+            element.setAttributeNS(null,"r",0);
+            element.setAttributeNS(null,"fill","gray");
+            element.setAttributeNS(null,"stroke-width",0);
+            element.setAttributeNS(null,"stroke","black");
+            circle.appendChild(element);
+            circle.id = "circle" + i.toString() + "by" + j.toString();
+            circle.style.position = "absolute";
+            circle.style.top = 0;
+            circle.style.left = 0;
+            circle.addEventListener("mouseenter",mouseEnter.bind([i,j]));
+            circle.addEventListener("mouseleave",mouseLeave.bind([i,j]));
+            circle.addEventListener("click",mouseClick.bind([i,j]))
+            boardDiv.appendChild(circle);
+          }
+        }
+      }
+      createShapes();
+      function drawBoard(){
+        var h = window.innerHeight;
+        var w = window.innerWidth;
+        var dim = Math.min(h,w) - 20;
+        boardDiv = document.getElementById("theBoard");
+        boardDiv.style.height = dim + "px";
+        boardDiv.style.width = dim + "px";
+        svgs = boardDiv.children;
+
+        for( var i = 0; i < 19; i++){
+          var p = dim/20*(i+1);//Math.round(dim/20*(i+1));
+          var strt = dim/20;//Math.round(dim/20);
+          var end = 19*dim/20;//Math.round(19*dim/20);
+          var line1 = document.getElementById("vertical" + i.toString());
+          line1.style.width = dim + "px";
+          line1.style.height = dim + "px";
+          var element = line1.children[0];
+          element.setAttributeNS(null,"x1",p);
+          element.setAttributeNS(null,"y1",strt);
+          element.setAttributeNS(null,"x2",p);
+          element.setAttributeNS(null,"y2",end);
+          var line2 = document.getElementById("horizontal" + i.toString());
+          line2.style.width = dim + "px";
+          line2.style.height = dim + "px";
+          element = line2.children[0];
+          element.setAttributeNS(null,"x1",strt);
+          element.setAttributeNS(null,"y1",p);
+          element.setAttributeNS(null,"x2",end);
+          element.setAttributeNS(null,"y2",p);
+        }
+
+        for(var i = 0; i < 19; i++){
+          for(var j = 0; j < 19; j++){
+            var x = dim/20*(i+1);//Math.round(dim/20*(i+1));
+            var y = dim/20*(j+1);//Math.round(dim/20*(j+1));
+            var r = dim/40 - 2;//Math.round(dim/40 - 2);
+            var circle = document.getElementById("circle" + i.toString() + "by" + j.toString());
+            circle.style.width = (2*r + 4) + "px";
+            circle.style.height = (2*r + 4) + "px";
+            circle.style.top = (x-r-2) + "px";
+            circle.style.left = (y-r-2) + "px";
+            var element = circle.children[0];
+            element.setAttributeNS(null,"cx",r + 2);
+            element.setAttributeNS(null,"cy",r + 2);
+            element.setAttributeNS(null,"r",r);
+            element.setAttributeNS(null,"fill","none");
+          }
+        }
+
+        k4 = dim/5 - 3;
+        k10 = dim/2 - 3;
+        k16 = 4*dim/5 - 3;
+        var point;
+        point = document.getElementById("star4x4");
+        point.style
+        point.style.top = k4+"px";
+        point.style.left = k4+"px";
+
+        point = document.getElementById("star4x10");
+        point.style.top = k4+"px";
+        point.style.left = k10+"px";
+
+        point = document.getElementById("star4x16");
+        point.style.top = k4+"px";
+        point.style.left = k16+"px";
+
+        point = document.getElementById("star10x4");
+        point.style.top = k10+"px";
+        point.style.left = k4+"px";
+
+        point = document.getElementById("star10x10");
+        point.style.top = k10+"px";
+        point.style.left = k10+"px";
+
+        point = document.getElementById("star10x16");
+        point.style.top = k10+"px";
+        point.style.left = k16+"px";
+
+        point = document.getElementById("star16x4");
+        point.style.top = k16+"px";
+        point.style.left = k4+"px";
+
+        point = document.getElementById("star16x10");
+        point.style.top = k16+"px";
+        point.style.left = k10+"px";
+
+        point = document.getElementById("star16x16");
+        point.style.top = k16+"px";
+        point.style.left = k16+"px";
       }
       drawBoard();
       window.addEventListener("resize",drawBoard);
+
+      function mouseEnter(){
+        //console.log(e);
+        //e.target.children[0].setAttributeNS(null,"fill",whoseMove);
+        //e.target.children[0].setAttributeNS(null,"stroke-width",2);
+        i = this[0];
+        j = this[1];
+        elt = document.getElementById("circle" + i.toString() + "by" + j.toString()).children[0];
+        elt.setAttributeNS(null,"fill",whoseMove)
+      }
+
+      function mouseLeave(){
+        //e.target.children[0].setAttributeNS(null,"fill","none");
+        //e.target.children[0].setAttributeNS(null,"stroke-width",0);
+        i = this[0];
+        j = this[1];
+        elt = document.getElementById("circle" + i.toString() + "by" + j.toString()).children[0];
+        if(boardPosition[i][j] == "gray"){
+          elt.setAttributeNS(null,"fill","none");
+        }
+        else{
+          elt.setAttributeNS(null,"fill",boardPosition[i][j])
+        }
+      }
+
+      function mouseClick(){
+        i = this[0];
+        j = this[1]
+        elt = document.getElementById("circle" + i.toString() + "by" + j.toString()).children[0];
+        elt.setAttributeNS(null,"fill",whoseMove);
+        boardPosition[i][j] = whoseMove;
+        if(whoseMove == "white"){
+          whoseMove = "black";
+        }
+        else{
+          whoseMove = "white";
+        }
+      }
     </script>
   </body>
 </html>
