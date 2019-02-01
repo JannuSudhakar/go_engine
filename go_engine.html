@@ -15,7 +15,7 @@
       for (var i = 0; i < 19; i ++){
         boardPosition.push([]);
         for (var j = 0; j < 19; j ++){
-          boardPosition[i].push("gray");
+          boardPosition[i].push("none");
         }
       }
       function createShapes(){
@@ -237,7 +237,7 @@
             element.setAttributeNS(null,"cx",r + 2);
             element.setAttributeNS(null,"cy",r + 2);
             element.setAttributeNS(null,"r",r);
-            element.setAttributeNS(null,"fill","none");
+            element.setAttributeNS(null,"fill",boardPosition[i][j]);
           }
         }
 
