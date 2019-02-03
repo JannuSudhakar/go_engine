@@ -301,7 +301,7 @@
         i = this[0];
         j = this[1];
         elt = document.getElementById("circle" + i.toString() + "by" + j.toString()).children[0];
-        if(boardPosition[i][j] == "gray"){
+        if(boardPosition[i][j] == "none"){
           elt.setAttributeNS(null,"fill","none");
         }
         else{
@@ -313,13 +313,178 @@
         i = this[0];
         j = this[1]
         elt = document.getElementById("circle" + i.toString() + "by" + j.toString()).children[0];
-        elt.setAttributeNS(null,"fill",whoseMove);
         boardPosition[i][j] = whoseMove;
+        removeSurroundedStones(whoseMove);
+        console.log(boardPosition);
+        elt.setAttributeNS(null,"fill",boardPosition[i][j]);
         if(whoseMove == "white"){
           whoseMove = "black";
         }
         else{
           whoseMove = "white";
+        }
+      }
+
+      function removeSurroundedStones(whoJustPlayed){
+        var theOtherPlayer;
+        if(whoJustPlayed == "white"){
+          theOtherPlayer = "black";
+        }
+        else{
+          theOtherPlayer = "white";
+        }
+        for(var i = 0; i < 19; i++){
+          for(var j = 0; j < 19; j++){
+            var checkedArray = [];
+            for(var u = 0; u < 19; u++){
+              checkedArray.push([]);
+              for(var v = 0; v < 19; v++){
+                checkedArray[u].push(false);
+              }
+            }
+            if((!checkedArray[i][j]) && (boardPosition[i][j] == theOtherPlayer)){
+              checkedArray[i][j] = true;
+              var group = [[i,j]];
+              var stack = [[i,j]];
+              var libertyCount = 0;
+              var di = 0;
+              while(stack.length != 0 && di < 10){
+                di ++;
+                //console.log(di);
+                //console.log(stack);
+                //console.log(group)
+                //console.log(stack.length);
+                var currij = stack.pop();
+                //console.log(currij);
+                //console.log(stack);
+                var curr_i = currij[0];
+                var curr_j = currij[1];
+                if(curr_i > 0){
+                  if(!checkedArray[curr_i-1][curr_j]){
+                    checkedArray[curr_i-1][curr_j] = true;
+                    if(boardPosition[curr_i-1][curr_j] == theOtherPlayer){
+                      stack.push([curr_i-1,curr_j]);
+                      group.push([curr_i-1,curr_j]);
+                    }
+                    else if(boardPosition[curr_i-1][curr_j] == "none"){libertyCount ++;}
+                  }
+                }
+                if(curr_j < 18){
+                  if(!checkedArray[curr_i][curr_j+1]){
+                    checkedArray[curr_i][curr_j+1] = true;
+                    if(boardPosition[curr_i][curr_j+1] == theOtherPlayer){
+                      stack.push([curr_i,curr_j+1]);
+                      group.push([curr_i,curr_j+1]);
+                    }
+                    else if(boardPosition[curr_i][curr_j+1] == "none"){libertyCount ++;}
+                  }
+                }
+                if(curr_j > 0){
+                  if(!checkedArray[curr_i][curr_j-1]){
+                    checkedArray[curr_i][curr_j-1] = true;
+                    if(boardPosition[curr_i][curr_j-1] == theOtherPlayer){
+                      stack.push([curr_i,curr_j-1]);
+                      group.push([curr_i,curr_j-1]);
+                    }
+                    else if(boardPosition[curr_i][curr_j-1] == "none"){libertyCount ++;}
+                  }
+                }
+                if(curr_i < 18){
+                  if(!checkedArray[curr_i+1][curr_j]){
+                    checkedArray[curr_i+1][curr_j] = true;
+                    if(boardPosition[curr_i+1][curr_j] == theOtherPlayer){
+                      stack.push([curr_i+1,curr_j]);
+                      group.push([curr_i+1,curr_j]);
+                    }
+                    else if(boardPosition[curr_i+1][curr_j] == "none"){libertyCount ++;}
+                  }
+                }
+              }
+              console.log(libertyCount);
+              if(libertyCount == 0){
+                for(var i = 0; i < group.length; i++){
+                  boardPosition[group[i][0]][group[i][1]] = "none";
+                  gi = group[i][0];
+                  gj = group[i][1];
+                  document.getElementById("circle" + gi.toString() + "by" + gj.toString()).children[0].setAttributeNS(null,"fill","none");
+                  console.log(group[i]);
+                }
+              }
+            }
+          }
+        }
+        var suicidalMove = false;
+        for(var i = 0; i < 19; i++){
+          for(var j = 0; j < 19; j++){
+            var checkedArray = [];
+            for(var u = 0; u < 19; u++){
+              checkedArray.push([]);
+              for(var v = 0; v < 19; v++){
+                checkedArray[u].push(false);
+              }
+            }
+            if(!checkedArray[i][j] && boardPosition[i][j] == whoJustPlayed){
+              var stack = [[i,j]];
+              var group = [[i,j]];
+              var libertyCount = 0;
+              var di = 0;
+              while(stack.length != 0 && di <10){
+                di ++;
+                var currij = stack.pop();
+                var curr_i = currij[0];
+                var curr_j = currij[1];
+                if(curr_i > 0){
+                  if(!checkedArray[curr_i-1][curr_j]){
+                    checkedArray[curr_i-1][curr_j] = true;
+                    if(boardPosition[curr_i-1,curr_j] == whoJustPlayed){
+                      stack.push([curr_i-1,curr_j]);
+                      group.push([curr_i-1,curr_j]);
+                    }
+                    else if(boardPosition[curr_i-1][curr_j] == "none"){libertyCount ++;}
+                  }
+                }
+                if(curr_j < 18){
+                  if(!checkedArray[curr_i][curr_j+1]){
+                    checkedArray[curr_i][curr_j+1] = true;
+                    if(boardPosition[curr_i][curr_j+1] == whoJustPlayed){
+                      stack.push([curr_i,curr_j+1]);
+                      group.push([curr_i,curr_j+1]);
+                    }
+                    else if(boardPosition[curr_i][curr_j+1] == "none"){libertyCount ++;}
+                  }
+                }
+                if(curr_j > 0){
+                  if(!checkedArray[curr_i][curr_j-1]){
+                    checkedArray[curr_i][curr_j-1] = true;
+                    if(boardPosition[curr_i][curr_j-1] == whoJustPlayed){
+                      stack.push([curr_i,curr_j-1]);
+                      group.push([curr_i,curr_j-1]);
+                    }
+                    else if(boardPosition[curr_i][curr_j-1] == "none"){libertyCount ++;}
+                  }
+                }
+                if(curr_i < 18){
+                  if(!checkedArray[curr_i+1][curr_j]){
+                    checkedArray[curr_i+1][curr_j] = true;
+                    if(boardPosition[curr_i+1][curr_j] == whoJustPlayed){
+                      stack.push([curr_i+1,curr_j]);
+                      group.push([curr_i+1,curr_j]);
+                    }
+                    else if(boardPosition[curr_i+1][curr_j] == "none"){libertyCount ++;}
+                  }
+                }
+              }
+              if(libertyCount == 0){
+                suicidalMove = true;
+                }
+              }
+            }
+          }
+        if(suicidalMove){
+          return "suicidalMove";
+        }
+        else{
+          return "legalMove";
         }
       }
     </script>
