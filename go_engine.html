@@ -149,9 +149,9 @@
 
         var starpoint9 = document.createElementNS("http://www.w3.org/2000/svg","svg");
         var point9 = document.createElementNS("http://www.w3.org/2000/svg","circle");
-        point9.setAttributeNS(null,"cx",3);
-        point9.setAttributeNS(null,"cy",3);
-        point9.setAttributeNS(null,"r",3);
+        point9.setAttributeNS(null,"cx",4);
+        point9.setAttributeNS(null,"cy",4);
+        point9.setAttributeNS(null,"r",4);
         point9.setAttributeNS(null,"fill","black");
         starpoint9.append(point9);
         starpoint9.style.position = "absolute";
@@ -170,6 +170,35 @@
         boardDiv.appendChild(starpoint9);
 
         for(var i = 0; i < 19; i++){
+          var text = document.createElementNS("http://www.w3.org/2000/svg","svg");
+          var element = document.createElementNS("http://www.w3.org/2000/svg","text");
+          element.setAttributeNS(null,"x",0);
+          element.setAttributeNS(null,"y",0);
+          element.setAttributeNS(null,"style","vertical-align:middle;align:center");
+          charCode = "A".charCodeAt(0) + i;
+          if(charCode >= "I".charCodeAt(0)){
+            charCode ++;
+          }
+          var textNode = document.createTextNode(String.fromCharCode(charCode));
+          element.appendChild(textNode);
+          text.appendChild(element);
+          text.id = "alphabet" + i.toString();
+          text.style.position = "absolute";
+          boardDiv.appendChild(text);
+        }
+
+        for(var i = 0; i < 19; i++){
+          var text = document.createElementNS("http://www.w3.org/2000/svg","svg");
+          var element = document.createElementNS("http://www.w3.org/2000/svg","text");
+          var textNode = document.createTextNode((i+1).toString());
+          element.appendChild(textNode);
+          text.appendChild(element);
+          text.id = "number" + i.toString();
+          text.style.position = "absolute";
+          boardDiv.appendChild(text);
+        }
+
+        for(var i = 0; i < 19; i++){
           for(var j = 0; j < 19; j++){
             var circle = document.createElementNS("http://www.w3.org/2000/svg","svg");
             var element = document.createElementNS("http://www.w3.org/2000/svg","circle");
@@ -178,7 +207,6 @@
             element.setAttributeNS(null,"r",0);
             element.setAttributeNS(null,"fill","gray");
             element.setAttributeNS(null,"stroke-width",0);
-            element.setAttributeNS(null,"stroke","black");
             circle.appendChild(element);
             circle.id = "circle" + i.toString() + "by" + j.toString();
             circle.style.position = "absolute";
@@ -192,6 +220,7 @@
         }
       }
       createShapes();
+
       function drawBoard(){
         var h = window.innerHeight;
         var w = window.innerWidth;
@@ -199,12 +228,13 @@
         boardDiv = document.getElementById("theBoard");
         boardDiv.style.height = dim + "px";
         boardDiv.style.width = dim + "px";
-        svgs = boardDiv.children;
+        //svgs = boardDiv.children;
 
         for( var i = 0; i < 19; i++){
-          var p = dim/20*(i+1);//Math.round(dim/20*(i+1));
-          var strt = dim/20;//Math.round(dim/20);
-          var end = 19*dim/20;//Math.round(19*dim/20);
+          var p = dim/21*(i+2);
+          var strt = 2*dim/21;
+          var end = 20*dim/21;
+
           var line1 = document.getElementById("vertical" + i.toString());
           line1.style.width = dim + "px";
           line1.style.height = dim + "px";
@@ -213,6 +243,27 @@
           element.setAttributeNS(null,"y1",strt);
           element.setAttributeNS(null,"x2",p);
           element.setAttributeNS(null,"y2",end);
+
+          var numberText = document.getElementById("number" + i.toString());
+          numberText.style.width = dim + "px";
+          numberText.style.height = dim + "px";
+          numberText.style.top = 0 + "px";
+          numberText.style.left = 0 + "px";
+          element = numberText.children[0];
+          element.setAttributeNS(null,"x",4);
+          element.setAttributeNS(null,"y",(p+dim/82).toString());
+          element.setAttributeNS(null,"style","font-size:" + (dim/42).toString() + "px;");
+
+          var numberText = document.getElementById("alphabet" + i.toString());
+          numberText.style.width = dim + "px";
+          numberText.style.height = dim + "px";
+          numberText.style.top = 0 + "px";
+          numberText.style.left = 0 + "px";
+          element = numberText.children[0];
+          element.setAttributeNS(null,"x",p);
+          element.setAttributeNS(null,"y",(dim/41 + 4).toString());
+          element.setAttributeNS(null,"style","font-size:" + (dim/42).toString() + "px;");
+
           var line2 = document.getElementById("horizontal" + i.toString());
           line2.style.width = dim + "px";
           line2.style.height = dim + "px";
@@ -225,9 +276,9 @@
 
         for(var i = 0; i < 19; i++){
           for(var j = 0; j < 19; j++){
-            var x = dim/20*(i+1);//Math.round(dim/20*(i+1));
-            var y = dim/20*(j+1);//Math.round(dim/20*(j+1));
-            var r = dim/40 - 2;//Math.round(dim/40 - 2);
+            var x = dim/21*(i+2);
+            var y = dim/21*(j+2);
+            var r = dim/42 - 2;
             var circle = document.getElementById("circle" + i.toString() + "by" + j.toString());
             circle.style.width = (2*r + 4) + "px";
             circle.style.height = (2*r + 4) + "px";
@@ -241,9 +292,9 @@
           }
         }
 
-        k4 = dim/5 - 3;
-        k10 = dim/2 - 3;
-        k16 = 4*dim/5 - 3;
+        k4 = 5*dim/21 - 2 ;
+        k10 = 11*dim/21 - 2;
+        k16 = 17*dim/21 - 2;
         var point;
         point = document.getElementById("star4x4");
         point.style
@@ -291,8 +342,10 @@
         //e.target.children[0].setAttributeNS(null,"stroke-width",2);
         i = this[0];
         j = this[1];
-        elt = document.getElementById("circle" + i.toString() + "by" + j.toString()).children[0];
-        elt.setAttributeNS(null,"fill",whoseMove)
+        if(boardPosition[i][j] == "none"){
+          elt = document.getElementById("circle" + i.toString() + "by" + j.toString()).children[0];
+          elt.setAttributeNS(null,"fill",whoseMove);
+        }
       }
 
       function mouseLeave(){
@@ -312,17 +365,23 @@
       function mouseClick(){
         i = this[0];
         j = this[1]
-        elt = document.getElementById("circle" + i.toString() + "by" + j.toString()).children[0];
+        if(boardPosition[i][j] != "none"){
+          return;
+        }
+        var elt = document.getElementById("circle" + i.toString() + "by" + j.toString()).children[0];
         boardPosition[i][j] = whoseMove;
-        removeSurroundedStones(whoseMove);
-        console.log(boardPosition);
-        elt.setAttributeNS(null,"fill",boardPosition[i][j]);
-        if(whoseMove == "white"){
+        var legality = removeSurroundedStones(whoseMove);
+        if(legality != "legalMove"){
+          boardPosition[i][j] = "none";
+        }
+        else if(whoseMove == "white"){
           whoseMove = "black";
         }
         else{
           whoseMove = "white";
         }
+        elt.setAttributeNS(null,"fill",boardPosition[i][j]);
+        //console.log(boardPosition);
       }
 
       function removeSurroundedStones(whoJustPlayed){
@@ -347,16 +406,9 @@
               var group = [[i,j]];
               var stack = [[i,j]];
               var libertyCount = 0;
-              var di = 0;
-              while(stack.length != 0 && di < 10){
-                di ++;
-                //console.log(di);
-                //console.log(stack);
-                //console.log(group)
-                //console.log(stack.length);
+              //console.log("starting with stone at:" + [i,j].toString())
+              while(stack.length != 0){
                 var currij = stack.pop();
-                //console.log(currij);
-                //console.log(stack);
                 var curr_i = currij[0];
                 var curr_j = currij[1];
                 if(curr_i > 0){
@@ -365,8 +417,15 @@
                     if(boardPosition[curr_i-1][curr_j] == theOtherPlayer){
                       stack.push([curr_i-1,curr_j]);
                       group.push([curr_i-1,curr_j]);
+                      //console.log("adding to stack:" + [curr_i-1,curr_j].toString());
                     }
-                    else if(boardPosition[curr_i-1][curr_j] == "none"){libertyCount ++;}
+                    else if(boardPosition[curr_i-1][curr_j] == "none"){
+                      libertyCount ++;
+                      //console.log("liberty at " + [curr_i-1,curr_j].toString());
+                    }
+                    //else{
+                      //console.log("opposing stone at "+[curr_i-1,curr_j].toString());
+                    //}
                   }
                 }
                 if(curr_j < 18){
@@ -375,8 +434,15 @@
                     if(boardPosition[curr_i][curr_j+1] == theOtherPlayer){
                       stack.push([curr_i,curr_j+1]);
                       group.push([curr_i,curr_j+1]);
+                      //console.log("adding to stack:" + [curr_i,curr_j+1].toString());
                     }
-                    else if(boardPosition[curr_i][curr_j+1] == "none"){libertyCount ++;}
+                    else if(boardPosition[curr_i][curr_j+1] == "none"){
+                      libertyCount ++;
+                      //console.log("liberty at " + [curr_i,curr_j+1].toString());
+                    }
+                    //else{
+                      //console.log("opposing stone at "+[curr_i,curr_j+1].toString());
+                    //}
                   }
                 }
                 if(curr_j > 0){
@@ -385,8 +451,15 @@
                     if(boardPosition[curr_i][curr_j-1] == theOtherPlayer){
                       stack.push([curr_i,curr_j-1]);
                       group.push([curr_i,curr_j-1]);
+                      //console.log("adding to stack:" + [curr_i,curr_j-1].toString());
                     }
-                    else if(boardPosition[curr_i][curr_j-1] == "none"){libertyCount ++;}
+                    else if(boardPosition[curr_i][curr_j-1] == "none"){
+                      libertyCount ++;
+                      //console.log("liberty at " + [curr_i,curr_j-1].toString());
+                    }
+                    //else{
+                      //console.log("opposing stone at "+[curr_i,curr_j-1].toString());
+                    //}
                   }
                 }
                 if(curr_i < 18){
@@ -395,12 +468,18 @@
                     if(boardPosition[curr_i+1][curr_j] == theOtherPlayer){
                       stack.push([curr_i+1,curr_j]);
                       group.push([curr_i+1,curr_j]);
+                      //console.log("adding to stack:" + [curr_i+1,curr_j].toString());
                     }
-                    else if(boardPosition[curr_i+1][curr_j] == "none"){libertyCount ++;}
+                    else if(boardPosition[curr_i+1][curr_j] == "none"){
+                      libertyCount ++;
+                      //console.log("liberty at " + [curr_i+1,curr_j].toString());
+                    }
+                    //else{
+                      //console.log("opposing stone at "+[curr_i+1,curr_j].toString());
+                    //}
                   }
                 }
               }
-              console.log(libertyCount);
               if(libertyCount == 0){
                 for(var i = 0; i < group.length; i++){
                   boardPosition[group[i][0]][group[i][1]] = "none";
@@ -413,6 +492,7 @@
             }
           }
         }
+
         var suicidalMove = false;
         for(var i = 0; i < 19; i++){
           for(var j = 0; j < 19; j++){
@@ -427,16 +507,14 @@
               var stack = [[i,j]];
               var group = [[i,j]];
               var libertyCount = 0;
-              var di = 0;
-              while(stack.length != 0 && di <10){
-                di ++;
+              while(stack.length != 0){
                 var currij = stack.pop();
                 var curr_i = currij[0];
                 var curr_j = currij[1];
                 if(curr_i > 0){
                   if(!checkedArray[curr_i-1][curr_j]){
                     checkedArray[curr_i-1][curr_j] = true;
-                    if(boardPosition[curr_i-1,curr_j] == whoJustPlayed){
+                    if(boardPosition[curr_i-1][curr_j] == whoJustPlayed){
                       stack.push([curr_i-1,curr_j]);
                       group.push([curr_i-1,curr_j]);
                     }
@@ -480,6 +558,7 @@
               }
             }
           }
+
         if(suicidalMove){
           return "suicidalMove";
         }
