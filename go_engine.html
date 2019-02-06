@@ -7,11 +7,12 @@
   </head>
 
   <body>
-    <div id="theBoard" style="background-color:gray; border:1px solid; margin:auto; position:relative"></div>
+    <div id="theBoard" style="background-color:gray; border:1px solid; margin:auto; position:absolute"></div>
+    <div id="treeNavigator" style="position:absolute;border:2px solid;"></div>
 
     <script>
       var whoseMove = "black";
-      var boardPosition = []
+      var boardPosition = [];
       for (var i = 0; i < 19; i ++){
         boardPosition.push([]);
         for (var j = 0; j < 19; j ++){
@@ -224,11 +225,34 @@
       function drawBoard(){
         var h = window.innerHeight;
         var w = window.innerWidth;
-        var dim = Math.min(h,w) - 20;
+        var dim = Math.min(h,w) - 30;
         boardDiv = document.getElementById("theBoard");
         boardDiv.style.height = dim + "px";
         boardDiv.style.width = dim + "px";
-        //svgs = boardDiv.children;
+        var treeDiv = document.getElementById("treeNavigator");
+        if(w > h + 350){
+          boardDiv.style.top = 10 + "px";
+          boardDiv.style.left = 10 + "px";
+          treeDiv.style.width = (w-dim-60) + "px";
+          treeDiv.style.height = dim + "px";
+          treeDiv.style.top = 10 + "px";
+          treeDiv.style.left = (dim + 40) + "px";
+        }
+        else{
+          boardDiv.style.top = 20 + "px";
+          boardDiv.style.left = (w-dim-10)/2 + "px";
+          treeDiv.style.top = (dim + 40) + "px";
+          treeDiv.style.height = 350 + "px";
+          if(w>h){
+            treeDiv.style.left = 10 + "px";
+            treeDiv.style.width = (w-35) + "px";
+          }
+          else{
+            treeDiv.style.left = (w-dim-10)/2 + "px";
+            treeDiv.style.width = dim + "px";
+          }
+        }
+        //else{}
 
         for( var i = 0; i < 19; i++){
           var p = dim/21*(i+2);
