@@ -8,7 +8,7 @@
 
   <body>
     <div id="theBoard" style="background-color:gray; border:1px solid; margin:auto; position:absolute"></div>
-    <div id="treeNavigator" style="position:absolute;border:2px solid;"></div>
+    <div id="treeNavigator" style="position:absolute;border:2px solid;overflow:scroll;"></div>
 
     <script>
       var whoseMove = "black";
@@ -19,6 +19,183 @@
           boardPosition[i].push("none");
         }
       }
+
+      var treeNodesBoardPositions = [];
+      var treeNodesWhoseMoves = [];
+      var treeNodesJustPlayed = [];
+      var gameTree = [];
+      var gameMoves = [[]];
+      var currNode = 0;
+      //filling in the tree with values for test cases
+      /*
+      gameTree = [[1],[2,3],[4],[5],[6,7],[8,9],[10],[11],[12],[13],[],[],[],[]];
+
+      for (var i = 0; i < 14; i++){
+        //initializing boardPositions
+        treeNodesBoardPositions.push([]);
+        for (var j = 0; j < 19; j++){
+          treeNodesBoardPositions[i].push([]);
+          for(var k = 0; k < 19; k++){
+            treeNodesBoardPositions[i][j].push(["none"]);
+          }
+        }
+        //pushing in whoseMove and justPlayed
+        if( i==0|i==2|i==3|i==6|i==7|i==8|i==9){
+          treeNodesWhoseMoves.push("black");
+          if(i>0){treeNodesJustPlayed.push("white");}
+          else{treeNodesJustPlayed.push("none");}
+        }
+        else{
+          treeNodesWhoseMoves.push("white");
+          treeNodesJustPlayed.push("black");
+        }
+        //setting boardPositions
+        if(i>0){
+          treeNodesBoardPositions[i][1][0] = "black";
+        }
+        if(i==2|i==4|i==6|i==10|i==7|i==11){
+          treeNodesBoardPositions[i][1][1] = "white";
+        }
+        else if(i>1){
+          treeNodesBoardPositions[i][2][1] = "white";
+        }
+        if(i>3){
+          treeNodesBoardPositions[i][1][2] = "black";
+        }
+        if(i==6|i==8|i==10|i==12){
+          treeNodesBoardPositions[i][1][3] = "white";
+        }
+        else if(i>5){
+          treeNodesBoardPositions[i][2][3] = "white";
+        }
+        if(i>9){
+          treeNodesBoardPositions[i][1][4] = "black";
+        }
+      }
+      */
+      //intialize nodes
+      gameTree = [[]];
+      treeNodesBoardPositions = [[]];
+      for (var i = 0; i < 19 ; i++){
+        treeNodesBoardPositions[0].push([]);
+        for(var j = 0; j < 19; j++){
+          treeNodesBoardPositions[0][i].push(["none"]);
+        }
+      }
+      treeNodesWhoseMoves = ["black"];
+      treeNodesJustPlayed = ["none"];
+      //done intializing nodes
+
+      function setBoardPositionFromTree(nodeIndex){
+        for(var i = 0 ; i < 19; i++){
+          for (var j = 0; j < 19; j ++){
+            boardPosition[i][j] = treeNodesBoardPositions[nodeIndex][i][j];
+          }
+        }
+        whoseMove = treeNodesWhoseMoves[nodeIndex];
+        drawBoard();
+      }
+
+      function setBoardPositionButtonClick(){
+        currNode = this;
+        setBoardPositionFromTree(this);
+      }
+
+      function displayGameTree(){
+        var treeDiv = document.getElementById("treeNavigator");
+        while(treeDiv.hasChildNodes()){
+          treeDiv.removeChild(treeDiv.lastChild);
+        }
+        var rootButton = document.createElement("button");
+        t = document.createTextNode("0");
+        rootButton.appendChild(t);
+        rootButton.style.borderRadius = "50%";
+        rootButton.style.margin = "5px";
+        rootButton.style.backgroundColor = "gray";
+        rootButton.style.height = "30px";
+        rootButton.style.width = "30px";
+        rootButton.style.textAlign = "center";
+        rootButton.style.padding = "0px";
+        rootButton.style.postion = "absolute";
+        rootButton.style.top = "0px";
+        rootButton.style.left = "0px";
+        if(currNode == 0){
+          //rootButton.style.borderStyle = "solid";
+          rootButton.style.borderColor = "lightGray";
+          rootButton.style.borderRadius = "40%";
+        }
+        rootButton.id = "0node";
+        rootButton.addEventListener("click",setBoardPositionButtonClick.bind(0));
+        treeDiv.appendChild(rootButton);
+        //breadth first search through the game tree;
+        var queue = gameTree[0];
+        var parentx = [0];
+        var parenty = [0];
+        var gameDepth = 0;
+        var y = 0;
+        while(queue.length > 0){
+          gameDepth ++;
+          var nextQueue = [];
+          var nextParentx = [];
+          var nextParenty = [];
+          var y = 0;
+          for(var i = 0; i < queue.length; i++){
+            y = Math.max(y,parenty[i]);
+            for(var j = 0; j < gameTree[queue[i]].length; j++){
+              nextQueue.push(gameTree[queue[i]][j]);
+              nextParentx.push(gameDepth);
+              nextParenty.push(y);
+            }
+            B = document.createElement("button");
+            t = document.createTextNode(gameDepth.toString());
+            B.appendChild(t);
+            B.style.borderRadius = "50%";
+            B.style.margin = "5px";
+            B.style.backgroundColor = treeNodesJustPlayed[queue[i]];
+            if(treeNodesJustPlayed[queue[i]] == "black"){
+              B.style.color = "white";
+            }
+            B.style.height = "30px";
+            B.style.width = "30px";
+            B.style.padding = "0px";
+            B.style.position = "absolute";
+            B.style.top = (40*y).toString() + "px";
+            B.style.left = (40*gameDepth).toString() + "px";
+            if(currNode == queue[i]){
+              //B.style.borderStyle = "solid";
+              B.style.borderColor = "gray";
+              B.style.borderRadius = "40%";
+            }
+            B.addEventListener("click",setBoardPositionButtonClick.bind(queue[i]));
+            B.id = queue[i] + "node";
+            treeDiv.appendChild(B);
+            trailTop = 40*parenty[i] + 18;
+            trailLeft = 40*parentx[i] + 18;
+            trailHeight = y-parenty[i];
+            var trail = document.createElementNS("http://www.w3.org/2000/svg","svg");
+            var element = document.createElementNS("http://www.w3.org/2000/svg","line");
+            element.setAttributeNS(null,"x1",2);
+            element.setAttributeNS(null,"y1",2);
+            element.setAttributeNS(null,"x2",42);
+            element.setAttributeNS(null,"y2",2+trailHeight*40);
+            element.setAttributeNS(null,"stroke","black");
+            trail.style.width = "44px";
+            trail.style.height = (trailHeight*40 + 4).toString() + "px";
+            trail.style.position = "absolute";
+            trail.style.top = trailTop.toString() + "px";
+            trail.style.left = trailLeft.toString() + "px";
+            trail.style.zIndex = "-1";
+            trail.appendChild(element);
+            treeDiv.appendChild(trail);
+            y++;
+          }
+          queue = nextQueue;
+          parentx = nextParentx;
+          parenty = nextParenty;
+        }
+      }
+      displayGameTree();
+
       function createShapes(){
         boardDiv = document.getElementById("theBoard");
         for(var i = 0; i < 19; i++){
@@ -356,6 +533,7 @@
         point = document.getElementById("star16x16");
         point.style.top = k16+"px";
         point.style.left = k16+"px";
+        displayGameTree();
       }
       drawBoard();
       window.addEventListener("resize",drawBoard);
@@ -392,20 +570,54 @@
         if(boardPosition[i][j] != "none"){
           return;
         }
-        var elt = document.getElementById("circle" + i.toString() + "by" + j.toString()).children[0];
+        //var elt = document.getElementById("circle" + i.toString() + "by" + j.toString()).children[0];
         boardPosition[i][j] = whoseMove;
         var legality = removeSurroundedStones(whoseMove);
+        var justPlayed = "none";
         if(legality != "legalMove"){
           boardPosition[i][j] = "none";
         }
         else if(whoseMove == "white"){
           whoseMove = "black";
+          justPlayed = "white"
         }
         else{
           whoseMove = "white";
+          justPlayed = "black";
         }
-        elt.setAttributeNS(null,"fill",boardPosition[i][j]);
-        //console.log(boardPosition);
+        var notAlreadyPlayed = true;
+        var nodeToGoTo = 0;
+        for (var u = 0; u < gameMoves[currNode].length; u++){
+          if(gameMoves[currNode][u][0] == i && gameMoves[currNode][u][1] == j){
+            notAlreadyPlayed = false;
+            nodeToGoTo = gameTree[currNode][u];
+            break;
+          }
+        }
+        if(legality == "legalMove"){
+          if(notAlreadyPlayed){
+            var temp = [];
+            for (var u = 0; u < 19; u++){
+              temp.push([]);
+              for (var v = 0; v < 19; v++){
+                temp[u].push(boardPosition[u][v]);
+              }
+            }
+            treeNodesBoardPositions.push(temp);
+            treeNodesWhoseMoves.push(whoseMove);
+            treeNodesJustPlayed.push(justPlayed);
+            gameTree.push([]);
+            gameMoves.push([]);
+            gameTree[currNode].push(gameTree.length-1);
+            gameMoves[currNode].push([i,j]);
+            currNode = gameTree.length - 1;
+            drawBoard();
+          }
+          else{
+            currNode = nodeToGoTo;
+            drawBoard();
+          }
+        }
       }
 
       function removeSurroundedStones(whoJustPlayed){
