@@ -129,8 +129,12 @@
         treeDiv.appendChild(rootButton);
         //breadth first search through the game tree;
         var queue = gameTree[0];
-        var parentx = [0];
-        var parenty = [0];
+        var parentx = [];
+        var parenty = [];
+        for (var i = 0; i < queue.length; i++){
+          parentx.push(0);
+          parenty.push(0);
+        }
         var gameDepth = 0;
         var y = 0;
         while(queue.length > 0){
@@ -192,6 +196,7 @@
           queue = nextQueue;
           parentx = nextParentx;
           parenty = nextParenty;
+          //console.log(parenty);
         }
       }
       displayGameTree();
