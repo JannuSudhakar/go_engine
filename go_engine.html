@@ -25,6 +25,8 @@
       var treeNodesJustPlayed = [];
       var gameTree = [];
       var gameMoves = [[]];
+      var gameTreeCoordinatesX = [0];
+      var gameTreeCoordinatesY = [0];
       var currNode = 0;
       //filling in the tree with values for test cases
       /*
@@ -106,6 +108,12 @@
         while(treeDiv.hasChildNodes()){
           treeDiv.removeChild(treeDiv.lastChild);
         }
+        gameTreeCoordinatesX = [];
+        gameTreeCoordinatesY = [];
+        for(var i = 0;  i < treeNodesBoardPositions.length; i++){
+          gameTreeCoordinatesX.push(0);
+          gameTreeCoordinatesY.push(0);
+        }
         var rootButton = document.createElement("button");
         t = document.createTextNode("0");
         rootButton.appendChild(t);
@@ -120,9 +128,9 @@
         rootButton.style.top = "0px";
         rootButton.style.left = "0px";
         if(currNode == 0){
-          //rootButton.style.borderStyle = "solid";
+          //rootButton.style.borderWidth = "10px";
           rootButton.style.borderColor = "lightGray";
-          rootButton.style.borderRadius = "40%";
+          rootButton.style.borderRadius = "0%";
         }
         rootButton.id = "0node";
         rootButton.addEventListener("click",setBoardPositionButtonClick.bind(0));
@@ -145,6 +153,8 @@
           var y = 0;
           for(var i = 0; i < queue.length; i++){
             y = Math.max(y,parenty[i]);
+            gameTreeCoordinatesX[queue[i]] = gameDepth;
+            gameTreeCoordinatesY[queue[i]] = y;
             for(var j = 0; j < gameTree[queue[i]].length; j++){
               nextQueue.push(gameTree[queue[i]][j]);
               nextParentx.push(gameDepth);
@@ -166,9 +176,9 @@
             B.style.top = (40*y).toString() + "px";
             B.style.left = (40*gameDepth).toString() + "px";
             if(currNode == queue[i]){
-              //B.style.borderStyle = "solid";
+              //B.style.border = "10px";
               B.style.borderColor = "gray";
-              B.style.borderRadius = "40%";
+              B.style.borderRadius = "0%";
             }
             B.addEventListener("click",setBoardPositionButtonClick.bind(queue[i]));
             B.id = queue[i] + "node";
@@ -198,6 +208,8 @@
           parenty = nextParenty;
           //console.log(parenty);
         }
+        console.log("gameTreeCoordinatesX: " + gameTreeCoordinatesX.toString());
+        console.log("gameTreeCoordinatesY: " + gameTreeCoordinatesY.toString());
       }
       displayGameTree();
 
@@ -539,6 +551,7 @@
         point.style.top = k16+"px";
         point.style.left = k16+"px";
         displayGameTree();
+        console.log("currNode from drawBoard: " + currNode.toString());
       }
       drawBoard();
       window.addEventListener("resize",drawBoard);
@@ -807,6 +820,59 @@
           return "legalMove";
         }
       }
+
+      function keyPress(e){
+        //console.log(e.key);
+        if(e.key == "ArrowRight"){
+          if(gameTree[currNode].length > 0){
+            currNode = gameTree[currNode][0];
+            setBoardPositionFromTree(currNode);
+            drawBoard();
+          }
+        }
+        if(e.key == "ArrowLeft"){
+          for(var i = 0; i < gameTree.length; i++){
+            if(gameTree[i].indexOf(currNode) > -1){
+              currNode = i;
+              setBoardPositionFromTree(currNode);
+              drawBoard();
+              continue;
+            }
+          }
+        }
+        if(e.key == "ArrowDown"){
+          sameXIndex = [];
+          sameX_Y = [];
+          for(var i = 0; i < gameTreeCoordinatesX.length; i++){
+            if(gameTreeCoordinatesX[i] == gameTreeCoordinatesX[currNode] && gameTreeCoordinatesY[i] > gameTreeCoordinatesY[currNode]){
+              sameXIndex.push(i);
+              sameX_Y.push(gameTreeCoordinatesY[i]);
+            }
+          }
+          if(sameXIndex.length>0){
+            currNode = sameXIndex[sameX_Y.indexOf(Math.min.apply(null,sameX_Y))];
+            setBoardPositionFromTree(currNode);
+            drawBoard();
+          }
+        }
+        if(e.key == "ArrowUp"){
+          sameXIndex = [];
+          sameX_Y = [];
+          console.log(currNode);
+          for(var i = 0; i < gameTreeCoordinatesX.length; i++){
+            if(gameTreeCoordinatesX[i] == gameTreeCoordinatesX[currNode] && gameTreeCoordinatesY[i] < gameTreeCoordinatesY[currNode]){
+              sameXIndex.push(i);
+              sameX_Y.push(gameTreeCoordinatesY[i]);
+            }
+          }
+          if(sameXIndex.length>0){
+            currNode = sameXIndex[sameX_Y.indexOf(Math.max.apply(null,sameX_Y))];
+            setBoardPositionFromTree(currNode);
+            drawBoard();
+          }
+        }
+      }
+      document.onkeydown = keyPress;
     </script>
   </body>
 </html>
