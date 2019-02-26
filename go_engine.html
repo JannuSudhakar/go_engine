@@ -3,12 +3,18 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
-    <title>go-cflake</title>
+    <title>goflake</title>
   </head>
 
   <body>
     <div id="theBoard" style="background-color:gray; border:1px solid; margin:auto; position:absolute"></div>
-    <div id="treeNavigator" style="position:absolute;border:2px solid;overflow:scroll;"></div>
+    <div id="controlContainer" style="position:absolute;border:0px solid">
+      <div id="treeNavigator" style="position:absolute;overflow:scroll;"></div>
+      <div id="buttonsBox" style="position:absolute;border-top:1px solid;">
+        <button id="saveButton" style="margin: 2px;padding: 0px;height:25px;" onclick=save()>save</button>
+        <button id="loadButton" style="margin: 2px;padding: 0px;height:25px;">load</button>
+      </div>
+    </div>
 
     <script>
       var whoseMove = "black";
@@ -208,8 +214,8 @@
           parenty = nextParenty;
           //console.log(parenty);
         }
-        console.log("gameTreeCoordinatesX: " + gameTreeCoordinatesX.toString());
-        console.log("gameTreeCoordinatesY: " + gameTreeCoordinatesY.toString());
+        //console.log("gameTreeCoordinatesX: " + gameTreeCoordinatesX.toString());
+        //console.log("gameTreeCoordinatesY: " + gameTreeCoordinatesY.toString());
       }
       displayGameTree();
 
@@ -423,26 +429,47 @@
         boardDiv = document.getElementById("theBoard");
         boardDiv.style.height = dim + "px";
         boardDiv.style.width = dim + "px";
+        var controlDiv = document.getElementById("controlContainer");
         var treeDiv = document.getElementById("treeNavigator");
+        var buttonDiv = document.getElementById("buttonsBox");
         if(w > h + 350){
           boardDiv.style.top = 10 + "px";
           boardDiv.style.left = 10 + "px";
+          controlDiv.style.width = (w-dim-60) + "px";
+          controlDiv.style.height = dim + "px";
+          controlDiv.style.top = 10 + "px";
+          controlDiv.style.left = (dim + 40) + "px";
           treeDiv.style.width = (w-dim-60) + "px";
-          treeDiv.style.height = dim + "px";
-          treeDiv.style.top = 10 + "px";
-          treeDiv.style.left = (dim + 40) + "px";
+          treeDiv.style.height = (dim-30) + "px";
+          treeDiv.style.top = 0 + "px";
+          treeDiv.style.left = 0 + "px";
+          buttonDiv.style.width = (w-dim-60) + "px";
+          buttonDiv.style.height = 30 + "px";
+          buttonDiv.style.top = (dim-30) + "px";
+          buttonDiv.style.left = 0 + "px";
         }
         else{
           boardDiv.style.top = 20 + "px";
           boardDiv.style.left = (w-dim-10)/2 + "px";
-          treeDiv.style.top = (dim + 40) + "px";
-          treeDiv.style.height = 350 + "px";
+          controlDiv.style.top = (dim + 40) + "px";
+          controlDiv.style.height = 350 + "px";
+          treeDiv.style.height = 320 + "px";
+          buttonDiv.style.height = 30 + "px";
+          treeDiv.style.top = 0 + "px";
+          buttonDiv.style.top = 320 + "px";
+          treeDiv.style.left = 0 + "px";
+          buttonDiv.style.left = 0 + "px";
+
           if(w>h){
-            treeDiv.style.left = 10 + "px";
+            controlDiv.style.left = 10 + "px";
+            controlDiv.style.width = (w-35) + "px";
+            buttonDiv.style.width = (w-35) + "px";
             treeDiv.style.width = (w-35) + "px";
           }
           else{
-            treeDiv.style.left = (w-dim-10)/2 + "px";
+            controlDiv.style.left = (w-dim-10)/2 + "px";
+            controlDiv.style.width = dim + "px";
+            buttonDiv.style.width = dim + "px";
             treeDiv.style.width = dim + "px";
           }
         }
@@ -551,7 +578,7 @@
         point.style.top = k16+"px";
         point.style.left = k16+"px";
         displayGameTree();
-        console.log("currNode from drawBoard: " + currNode.toString());
+        //console.log("currNode from drawBoard: " + currNode.toString());
       }
       drawBoard();
       window.addEventListener("resize",drawBoard);
@@ -872,6 +899,61 @@
           }
         }
       }
+
+      function download(data, filename, type) {
+        var file = new Blob([data], {type: type});
+        if (window.navigator.msSaveOrOpenBlob) // IE10+
+            window.navigator.msSaveOrOpenBlob(file, filename);
+        else { // Others
+            var a = document.createElement("a"),
+                    url = URL.createObjectURL(file);
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(function() {
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            }, 0);
+        }
+      }
+
+      function recursive_build_text(curr_node,text){
+        //curr_node = node_stack.pop();
+        for( var i = 0; i < gameTree[curr_node].length; i++){
+          if(gameTree[curr_node].length > 1){
+            text = text + "(";
+          }
+          text = text + ";";
+          if(treeNodesWhoseMoves[curr_node] == "black"){
+            text += "B[";
+          }
+          else{
+            text += "W[";
+          }
+          text += String.fromCharCode(("a".charCodeAt(0) + gameMoves[curr_node][i][1]));
+          text += String.fromCharCode(("a".charCodeAt(0) + gameMoves[curr_node][i][0]));
+          text += "]";
+          text = recursive_build_text(gameTree[curr_node][i],text);
+          if(gameTree[curr_node].length > 1){
+            text += ")";
+          }
+        }
+        return text;
+      }
+
+      function save(){
+        console.log("lets save now");
+        var filename = window.prompt("enter filename(without .sgf)") + ".sgf";
+        console.log(filename);
+        var pb = window.prompt("enter name of black player");
+        var pw = window.prompt("enter name of white player");
+        var text = "(;GM[1]FF[4]SZ[19]AP[goflake]PB[" + pb + "]PW[" + pw + "]KM[7.5]RU[Chinese]";
+        text = recursive_build_text(0,text) + ")";
+        var blob = new Blob([text], {type: "text/plain;charset=utf-8"});
+        download(blob, filename,"text");
+      }
+
       document.onkeydown = keyPress;
     </script>
   </body>
