@@ -12,7 +12,7 @@
       <div id="treeNavigator" style="position:absolute;overflow:scroll;"></div>
       <div id="buttonsBox" style="position:absolute;border-top:1px solid;">
         <button id="saveButton" style="margin: 2px;padding: 0px;height:25px;" onclick=save()>save</button>
-        <button id="loadButton" style="margin: 2px;padding: 0px;height:25px;">load</button>
+        <input type="file" id="loadButton" style="margin: 2px;padding: 0px;height:25px;"/>
       </div>
     </div>
 
@@ -954,6 +954,18 @@
         download(blob, filename,"text");
       }
 
+      function onLoadFileHandler(e){
+        file_contents = e.target.result;
+        window.alert("in the process of being implemented, contact the dev for faster development");
+      }
+      function load(){
+        var reader = new FileReader();
+        file = document.getElementById("loadButton").files[0];
+        reader.onload = onLoadFileHandler;
+        reader.readAsText(file);
+      }
+
+      document.getElementById("loadButton").addEventListener("change",load)
       document.onkeydown = keyPress;
     </script>
   </body>
