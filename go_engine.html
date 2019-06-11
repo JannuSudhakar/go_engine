@@ -17,6 +17,45 @@
     </div>
 
     <script>
+      //functions to do the heaviest lifting
+      function evaluateMove(boardPosition,prevBoardPosition,move){
+        //move is GameMove object.
+      }
+      //the object definitions, the biggest reason for the refactor
+      function GameState(boardPosition,prevBoardPosition,whoseMove){
+        this.boardPosition = boardPosition;
+        this.prevBoardPosition = prevBoardPosition;
+        this.whoseMove = whoseMove;
+      }
+      function GameMove(x,y,whoMoved){
+        this.x = x;
+        this.y = y;
+        this.whoMoved = whoMoved;
+      }
+
+      function Game(boardSize){
+        this.boardSize = boardSize;
+        var startBoardPosition = [];
+        for (var i = 0; i < boardSize; i++){
+          startBoardPosition.push([]);
+          for(var j = 0; j < boardSize; j++){
+            startBoardPosition[j].push("none");
+          }
+        }
+        var startGameState = [new GameState(startBoardPosition,startBoardPosition,"black")];
+        this.gameStates = [startGameState];
+        this.gameMoves = [new GameMove(null,null,"white")];
+        this.gameTree = [];
+
+        this.makeMove = function(){
+
+        }
+      }
+
+      var currentGame = new Game(19);
+      //That was the object definitions.
+
+      //everything below this is before refactoring
       var whoseMove = "black";
       var boardPosition = [];
       for (var i = 0; i < 19; i ++){
@@ -956,7 +995,7 @@
 
       function onLoadFileHandler(e){
         file_contents = e.target.result;
-        window.alert("in the process of being implemented, contact the dev for faster development");
+        window.alert(file_contents);
       }
       function load(){
         var reader = new FileReader();
