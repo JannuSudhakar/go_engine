@@ -17,247 +17,7 @@
     </div>
 
     <script>
-      //functions to do the heaviest lifting
-      function evaluateMove(boardPosition,prevBoardPosition,move){
-        //move is GameMove object.
-      }
-      //the object definitions, the biggest reason for the refactor
-      function GameState(boardPosition,prevBoardPosition,whoseMove){
-        this.boardPosition = boardPosition;
-        this.prevBoardPosition = prevBoardPosition;
-        this.whoseMove = whoseMove;
-      }
-      function GameMove(x,y,whoMoved){
-        this.x = x;
-        this.y = y;
-        this.whoMoved = whoMoved;
-      }
-
-      function Game(boardSize){
-        this.boardSize = boardSize;
-        var startBoardPosition = [];
-        for (var i = 0; i < boardSize; i++){
-          startBoardPosition.push([]);
-          for(var j = 0; j < boardSize; j++){
-            startBoardPosition[j].push("none");
-          }
-        }
-        var startGameState = [new GameState(startBoardPosition,startBoardPosition,"black")];
-        this.gameStates = [startGameState];
-        this.gameMoves = [new GameMove(null,null,"white")];
-        this.gameTree = [];
-
-        this.makeMove = function(){
-
-        }
-      }
-
-      var currentGame = new Game(19);
-      //That was the object definitions.
-
-      //everything below this is before refactoring
-      var whoseMove = "black";
-      var boardPosition = [];
-      for (var i = 0; i < 19; i ++){
-        boardPosition.push([]);
-        for (var j = 0; j < 19; j ++){
-          boardPosition[i].push("none");
-        }
-      }
-
-      var treeNodesBoardPositions = [];
-      var treeNodesWhoseMoves = [];
-      var treeNodesJustPlayed = [];
-      var gameTree = [];
-      var gameMoves = [[]];
-      var gameTreeCoordinatesX = [0];
-      var gameTreeCoordinatesY = [0];
-      var currNode = 0;
-      //filling in the tree with values for test cases
-      /*
-      gameTree = [[1],[2,3],[4],[5],[6,7],[8,9],[10],[11],[12],[13],[],[],[],[]];
-
-      for (var i = 0; i < 14; i++){
-        //initializing boardPositions
-        treeNodesBoardPositions.push([]);
-        for (var j = 0; j < 19; j++){
-          treeNodesBoardPositions[i].push([]);
-          for(var k = 0; k < 19; k++){
-            treeNodesBoardPositions[i][j].push(["none"]);
-          }
-        }
-        //pushing in whoseMove and justPlayed
-        if( i==0|i==2|i==3|i==6|i==7|i==8|i==9){
-          treeNodesWhoseMoves.push("black");
-          if(i>0){treeNodesJustPlayed.push("white");}
-          else{treeNodesJustPlayed.push("none");}
-        }
-        else{
-          treeNodesWhoseMoves.push("white");
-          treeNodesJustPlayed.push("black");
-        }
-        //setting boardPositions
-        if(i>0){
-          treeNodesBoardPositions[i][1][0] = "black";
-        }
-        if(i==2|i==4|i==6|i==10|i==7|i==11){
-          treeNodesBoardPositions[i][1][1] = "white";
-        }
-        else if(i>1){
-          treeNodesBoardPositions[i][2][1] = "white";
-        }
-        if(i>3){
-          treeNodesBoardPositions[i][1][2] = "black";
-        }
-        if(i==6|i==8|i==10|i==12){
-          treeNodesBoardPositions[i][1][3] = "white";
-        }
-        else if(i>5){
-          treeNodesBoardPositions[i][2][3] = "white";
-        }
-        if(i>9){
-          treeNodesBoardPositions[i][1][4] = "black";
-        }
-      }
-      */
-      //intialize nodes
-      gameTree = [[]];
-      treeNodesBoardPositions = [[]];
-      for (var i = 0; i < 19 ; i++){
-        treeNodesBoardPositions[0].push([]);
-        for(var j = 0; j < 19; j++){
-          treeNodesBoardPositions[0][i].push(["none"]);
-        }
-      }
-      treeNodesWhoseMoves = ["black"];
-      treeNodesJustPlayed = ["none"];
-      //done intializing nodes
-
-      function setBoardPositionFromTree(nodeIndex){
-        for(var i = 0 ; i < 19; i++){
-          for (var j = 0; j < 19; j ++){
-            boardPosition[i][j] = treeNodesBoardPositions[nodeIndex][i][j];
-          }
-        }
-        whoseMove = treeNodesWhoseMoves[nodeIndex];
-        drawBoard();
-      }
-
-      function setBoardPositionButtonClick(){
-        currNode = this;
-        setBoardPositionFromTree(this);
-      }
-
-      function displayGameTree(){
-        var treeDiv = document.getElementById("treeNavigator");
-        while(treeDiv.hasChildNodes()){
-          treeDiv.removeChild(treeDiv.lastChild);
-        }
-        gameTreeCoordinatesX = [];
-        gameTreeCoordinatesY = [];
-        for(var i = 0;  i < treeNodesBoardPositions.length; i++){
-          gameTreeCoordinatesX.push(0);
-          gameTreeCoordinatesY.push(0);
-        }
-        var rootButton = document.createElement("button");
-        t = document.createTextNode("0");
-        rootButton.appendChild(t);
-        rootButton.style.borderRadius = "50%";
-        rootButton.style.margin = "5px";
-        rootButton.style.backgroundColor = "gray";
-        rootButton.style.height = "30px";
-        rootButton.style.width = "30px";
-        rootButton.style.textAlign = "center";
-        rootButton.style.padding = "0px";
-        rootButton.style.postion = "absolute";
-        rootButton.style.top = "0px";
-        rootButton.style.left = "0px";
-        if(currNode == 0){
-          //rootButton.style.borderWidth = "10px";
-          rootButton.style.borderColor = "lightGray";
-          rootButton.style.borderRadius = "0%";
-        }
-        rootButton.id = "0node";
-        rootButton.addEventListener("click",setBoardPositionButtonClick.bind(0));
-        treeDiv.appendChild(rootButton);
-        //breadth first search through the game tree;
-        var queue = gameTree[0];
-        var parentx = [];
-        var parenty = [];
-        for (var i = 0; i < queue.length; i++){
-          parentx.push(0);
-          parenty.push(0);
-        }
-        var gameDepth = 0;
-        var y = 0;
-        while(queue.length > 0){
-          gameDepth ++;
-          var nextQueue = [];
-          var nextParentx = [];
-          var nextParenty = [];
-          var y = 0;
-          for(var i = 0; i < queue.length; i++){
-            y = Math.max(y,parenty[i]);
-            gameTreeCoordinatesX[queue[i]] = gameDepth;
-            gameTreeCoordinatesY[queue[i]] = y;
-            for(var j = 0; j < gameTree[queue[i]].length; j++){
-              nextQueue.push(gameTree[queue[i]][j]);
-              nextParentx.push(gameDepth);
-              nextParenty.push(y);
-            }
-            B = document.createElement("button");
-            t = document.createTextNode(gameDepth.toString());
-            B.appendChild(t);
-            B.style.borderRadius = "50%";
-            B.style.margin = "5px";
-            B.style.backgroundColor = treeNodesJustPlayed[queue[i]];
-            if(treeNodesJustPlayed[queue[i]] == "black"){
-              B.style.color = "white";
-            }
-            B.style.height = "30px";
-            B.style.width = "30px";
-            B.style.padding = "0px";
-            B.style.position = "absolute";
-            B.style.top = (40*y).toString() + "px";
-            B.style.left = (40*gameDepth).toString() + "px";
-            if(currNode == queue[i]){
-              //B.style.border = "10px";
-              B.style.borderColor = "gray";
-              B.style.borderRadius = "0%";
-            }
-            B.addEventListener("click",setBoardPositionButtonClick.bind(queue[i]));
-            B.id = queue[i] + "node";
-            treeDiv.appendChild(B);
-            trailTop = 40*parenty[i] + 18;
-            trailLeft = 40*parentx[i] + 18;
-            trailHeight = y-parenty[i];
-            var trail = document.createElementNS("http://www.w3.org/2000/svg","svg");
-            var element = document.createElementNS("http://www.w3.org/2000/svg","line");
-            element.setAttributeNS(null,"x1",2);
-            element.setAttributeNS(null,"y1",2);
-            element.setAttributeNS(null,"x2",42);
-            element.setAttributeNS(null,"y2",2+trailHeight*40);
-            element.setAttributeNS(null,"stroke","black");
-            trail.style.width = "44px";
-            trail.style.height = (trailHeight*40 + 4).toString() + "px";
-            trail.style.position = "absolute";
-            trail.style.top = trailTop.toString() + "px";
-            trail.style.left = trailLeft.toString() + "px";
-            trail.style.zIndex = "-1";
-            trail.appendChild(element);
-            treeDiv.appendChild(trail);
-            y++;
-          }
-          queue = nextQueue;
-          parentx = nextParentx;
-          parenty = nextParenty;
-          //console.log(parenty);
-        }
-        //console.log("gameTreeCoordinatesX: " + gameTreeCoordinatesX.toString());
-        //console.log("gameTreeCoordinatesY: " + gameTreeCoordinatesY.toString());
-      }
-      displayGameTree();
-
+      //rendering functions
       function createShapes(){
         boardDiv = document.getElementById("theBoard");
         for(var i = 0; i < 19; i++){
@@ -461,9 +221,10 @@
       }
       createShapes();
 
-      function drawBoard(){
+      function drawBoard(boardPosition){
         var h = window.innerHeight;
         var w = window.innerWidth;
+        console.log([h,w]);
         var dim = Math.min(h,w) - 30;
         boardDiv = document.getElementById("theBoard");
         boardDiv.style.height = dim + "px";
@@ -619,8 +380,306 @@
         displayGameTree();
         //console.log("currNode from drawBoard: " + currNode.toString());
       }
-      drawBoard();
-      window.addEventListener("resize",drawBoard);
+
+      function displayGameTree(){
+        var pass = 1+1;
+      }
+
+      //functions to do the heaviest lifting
+      function otherPlayer(who){
+        if(who == "white"){
+          return "black";
+        }
+        if(who == "black"){
+          return "white";
+        }
+      }
+      function evaluateMove(boardPosition,prevBoardPosition,move){
+        //move is GameMove object.
+        //return a list containing first element as
+        //the evaluation and the second element as
+        //the board position that should result after
+        //the attempt at the move.
+
+        //let's start this thing by not doing the
+        //stone removal, ko rules and suicide rules
+
+        var ret = [];
+        for (var i = 0; i < boardPosition.length; i++){
+          ret.push([]);
+          for (var j = 0; j < boardPosition.length; j++){
+            ret[i].push(boardPosition[i][j]);
+          }
+        }
+        if(move.x != null && move.y != null){
+          ret[move.x][move.y] = move.whoMoved;
+        }
+        return ["valid",ret];
+      }
+      //the object definitions, the biggest reason for the refactor
+      function GameState(boardPosition,prevBoardPosition,whoseMove){
+        this.boardPosition = boardPosition;
+        this.prevBoardPosition = prevBoardPosition;
+        this.whoseMove = whoseMove;
+      }
+      function GameMove(x,y,whoMoved){
+        this.x = x;
+        this.y = y;
+        this.whoMoved = whoMoved;
+      }
+
+      function Game(boardSize){
+        this.boardSize = boardSize;
+        var startBoardPosition = [];
+        for (var i = 0; i < boardSize; i++){
+          startBoardPosition.push([]);
+          for(var j = 0; j < boardSize; j++){
+            startBoardPosition[i].push("none");
+          }
+        }
+        var startGameState = new GameState(startBoardPosition,startBoardPosition,"black");
+        this.gameStates = [startGameState];
+        this.gameMoves = [new GameMove(null,null,"white")];
+        this.gameTree = [[]];
+        this.moveNumber = 0;
+
+        this.makeMove = function(move){
+          var retList = evaluateMove(this.boardPosition,this.prevBoardPosition,move);
+          var isNewMove = true;
+          if(retList[0] == "valid" && isNewMove){
+            var newGameState = new GameState(retList[1],this.BoardPosition,prevBoardPosition,otherPlayer(move.whoMoved));
+            this.gameTree[this.moveNumber].append(gameTree.length);
+            this.gameTree.push([]);
+            this.gameStates.push(newGameState);
+            this.gameMoves.push(move);
+          }
+        }
+      }
+
+      var currentGame = new Game(19);
+      //That was the object definitions.
+
+      //response functions
+      function mouseEnter(){
+        var pass = 1+1;
+      }
+      function mouseLeave(){
+        var pass = 1+1;
+      }
+      function mouseClick(){
+        var pass = 1+1;
+      }
+      //putting stuff in motion
+      function drawBoardCaller(){
+        drawBoard(currentGame.gameStates[currentGame.moveNumber].boardPosition);
+      }
+      drawBoardCaller();
+      window.addEventListener("resize",drawBoardCaller);
+
+      //everything below this is before refactoring
+      /*var whoseMove = "black";
+      var boardPosition = [];
+      for (var i = 0; i < 19; i ++){
+        boardPosition.push([]);
+        for (var j = 0; j < 19; j ++){
+          boardPosition[i].push("none");
+        }
+      }
+
+      var treeNodesBoardPositions = [];
+      var treeNodesWhoseMoves = [];
+      var treeNodesJustPlayed = [];
+      var gameTree = [];
+      var gameMoves = [[]];
+      var gameTreeCoordinatesX = [0];
+      var gameTreeCoordinatesY = [0];
+      var currNode = 0;
+      //filling in the tree with values for test cases
+      /*
+      gameTree = [[1],[2,3],[4],[5],[6,7],[8,9],[10],[11],[12],[13],[],[],[],[]];
+
+      for (var i = 0; i < 14; i++){
+        //initializing boardPositions
+        treeNodesBoardPositions.push([]);
+        for (var j = 0; j < 19; j++){
+          treeNodesBoardPositions[i].push([]);
+          for(var k = 0; k < 19; k++){
+            treeNodesBoardPositions[i][j].push(["none"]);
+          }
+        }
+        //pushing in whoseMove and justPlayed
+        if( i==0|i==2|i==3|i==6|i==7|i==8|i==9){
+          treeNodesWhoseMoves.push("black");
+          if(i>0){treeNodesJustPlayed.push("white");}
+          else{treeNodesJustPlayed.push("none");}
+        }
+        else{
+          treeNodesWhoseMoves.push("white");
+          treeNodesJustPlayed.push("black");
+        }
+        //setting boardPositions
+        if(i>0){
+          treeNodesBoardPositions[i][1][0] = "black";
+        }
+        if(i==2|i==4|i==6|i==10|i==7|i==11){
+          treeNodesBoardPositions[i][1][1] = "white";
+        }
+        else if(i>1){
+          treeNodesBoardPositions[i][2][1] = "white";
+        }
+        if(i>3){
+          treeNodesBoardPositions[i][1][2] = "black";
+        }
+        if(i==6|i==8|i==10|i==12){
+          treeNodesBoardPositions[i][1][3] = "white";
+        }
+        else if(i>5){
+          treeNodesBoardPositions[i][2][3] = "white";
+        }
+        if(i>9){
+          treeNodesBoardPositions[i][1][4] = "black";
+        }
+      }
+      */
+      //intialize nodes
+      /*
+      gameTree = [[]];
+      treeNodesBoardPositions = [[]];
+      for (var i = 0; i < 19 ; i++){
+        treeNodesBoardPositions[0].push([]);
+        for(var j = 0; j < 19; j++){
+          treeNodesBoardPositions[0][i].push(["none"]);
+        }
+      }
+      treeNodesWhoseMoves = ["black"];
+      treeNodesJustPlayed = ["none"];
+      //done intializing nodes
+
+      function setBoardPositionFromTree(nodeIndex){
+        for(var i = 0 ; i < 19; i++){
+          for (var j = 0; j < 19; j ++){
+            boardPosition[i][j] = treeNodesBoardPositions[nodeIndex][i][j];
+          }
+        }
+        whoseMove = treeNodesWhoseMoves[nodeIndex];
+        drawBoard();
+      }
+
+      function setBoardPositionButtonClick(){
+        currNode = this;
+        setBoardPositionFromTree(this);
+      }
+
+      function displayGameTree(){
+        var treeDiv = document.getElementById("treeNavigator");
+        while(treeDiv.hasChildNodes()){
+          treeDiv.removeChild(treeDiv.lastChild);
+        }
+        gameTreeCoordinatesX = [];
+        gameTreeCoordinatesY = [];
+        for(var i = 0;  i < treeNodesBoardPositions.length; i++){
+          gameTreeCoordinatesX.push(0);
+          gameTreeCoordinatesY.push(0);
+        }
+        var rootButton = document.createElement("button");
+        t = document.createTextNode("0");
+        rootButton.appendChild(t);
+        rootButton.style.borderRadius = "50%";
+        rootButton.style.margin = "5px";
+        rootButton.style.backgroundColor = "gray";
+        rootButton.style.height = "30px";
+        rootButton.style.width = "30px";
+        rootButton.style.textAlign = "center";
+        rootButton.style.padding = "0px";
+        rootButton.style.postion = "absolute";
+        rootButton.style.top = "0px";
+        rootButton.style.left = "0px";
+        if(currNode == 0){
+          //rootButton.style.borderWidth = "10px";
+          rootButton.style.borderColor = "lightGray";
+          rootButton.style.borderRadius = "0%";
+        }
+        rootButton.id = "0node";
+        rootButton.addEventListener("click",setBoardPositionButtonClick.bind(0));
+        treeDiv.appendChild(rootButton);
+        //breadth first search through the game tree;
+        var queue = gameTree[0];
+        var parentx = [];
+        var parenty = [];
+        for (var i = 0; i < queue.length; i++){
+          parentx.push(0);
+          parenty.push(0);
+        }
+        var gameDepth = 0;
+        var y = 0;
+        while(queue.length > 0){
+          gameDepth ++;
+          var nextQueue = [];
+          var nextParentx = [];
+          var nextParenty = [];
+          var y = 0;
+          for(var i = 0; i < queue.length; i++){
+            y = Math.max(y,parenty[i]);
+            gameTreeCoordinatesX[queue[i]] = gameDepth;
+            gameTreeCoordinatesY[queue[i]] = y;
+            for(var j = 0; j < gameTree[queue[i]].length; j++){
+              nextQueue.push(gameTree[queue[i]][j]);
+              nextParentx.push(gameDepth);
+              nextParenty.push(y);
+            }
+            B = document.createElement("button");
+            t = document.createTextNode(gameDepth.toString());
+            B.appendChild(t);
+            B.style.borderRadius = "50%";
+            B.style.margin = "5px";
+            B.style.backgroundColor = treeNodesJustPlayed[queue[i]];
+            if(treeNodesJustPlayed[queue[i]] == "black"){
+              B.style.color = "white";
+            }
+            B.style.height = "30px";
+            B.style.width = "30px";
+            B.style.padding = "0px";
+            B.style.position = "absolute";
+            B.style.top = (40*y).toString() + "px";
+            B.style.left = (40*gameDepth).toString() + "px";
+            if(currNode == queue[i]){
+              //B.style.border = "10px";
+              B.style.borderColor = "gray";
+              B.style.borderRadius = "0%";
+            }
+            B.addEventListener("click",setBoardPositionButtonClick.bind(queue[i]));
+            B.id = queue[i] + "node";
+            treeDiv.appendChild(B);
+            trailTop = 40*parenty[i] + 18;
+            trailLeft = 40*parentx[i] + 18;
+            trailHeight = y-parenty[i];
+            var trail = document.createElementNS("http://www.w3.org/2000/svg","svg");
+            var element = document.createElementNS("http://www.w3.org/2000/svg","line");
+            element.setAttributeNS(null,"x1",2);
+            element.setAttributeNS(null,"y1",2);
+            element.setAttributeNS(null,"x2",42);
+            element.setAttributeNS(null,"y2",2+trailHeight*40);
+            element.setAttributeNS(null,"stroke","black");
+            trail.style.width = "44px";
+            trail.style.height = (trailHeight*40 + 4).toString() + "px";
+            trail.style.position = "absolute";
+            trail.style.top = trailTop.toString() + "px";
+            trail.style.left = trailLeft.toString() + "px";
+            trail.style.zIndex = "-1";
+            trail.appendChild(element);
+            treeDiv.appendChild(trail);
+            y++;
+          }
+          queue = nextQueue;
+          parentx = nextParentx;
+          parenty = nextParenty;
+          //console.log(parenty);
+        }
+        //console.log("gameTreeCoordinatesX: " + gameTreeCoordinatesX.toString());
+        //console.log("gameTreeCoordinatesY: " + gameTreeCoordinatesY.toString());
+      }
+      displayGameTree();
+
 
       function mouseEnter(){
         //console.log(e);
@@ -1005,7 +1064,7 @@
       }
 
       document.getElementById("loadButton").addEventListener("change",load)
-      document.onkeydown = keyPress;
+      document.onkeydown = keyPress;*/
     </script>
   </body>
 </html>
