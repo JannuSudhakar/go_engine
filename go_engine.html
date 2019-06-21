@@ -224,7 +224,7 @@
       function drawBoard(boardPosition){
         var h = window.innerHeight;
         var w = window.innerWidth;
-        console.log([h,w]);
+        //console.log([h,w]);
         var dim = Math.min(h,w) - 30;
         boardDiv = document.getElementById("theBoard");
         boardDiv.style.height = dim + "px";
@@ -390,9 +390,74 @@
         if(who == "white"){
           return "black";
         }
-        if(who == "black"){
+        else if(who == "black"){
           return "white";
         }
+        else{
+          return null;
+        }
+      }
+
+      function countLiberties(startCoordinates,boardPosition){
+        var color = boardPosition[startCoordinates[0],startCoordinates[1]];
+        var checkedArray = []
+        var groupMembers = [[startCoordinates[0],startCoordinates[1]]];
+        var toBeCheckedStack = [startCoordinates];
+        var liberties = 0;
+        for (var i = 0; i < boardPosition.length; i++){
+          checkedArray.push([]);
+          for (var j = 0; j < boardPosition.length; j++){
+            checkedArray[i].push(0);
+          }
+        }
+        checkedArray[startCoordinates[0],startCoordinates[1]] = 1;
+        while(toBeCheckedStack.length > 0){
+          var currx = toBeCheckedStack.pop();
+          console.log(currx);
+          var curry = currx[1];
+          currx = currx[0];
+          if(currx > 0){
+            if(boardPosition[currx-1][curry] == color && checkedArray[currx-1][curry] == 0){
+              groupMembers.push([currx-1,curry]);
+              toBeCheckedStack.push([currx-1,curry]);
+            }
+            if(boardPosition[currx-1][curry] == "none" && checkedArray[currx-1][curry] == 0){
+              liberties ++;
+            }
+            checkedArray[currx-1][curry] = 1;
+          }
+          if(currx < (boardPosition.length - 1)){
+            if(boardPosition[currx+1][curry] == color && checkedArray[currx+1][curry] == 0){
+              groupMembers.push([currx+1,curry]);
+              toBeCheckedStack.push([currx+1,curry]);
+            }
+            if(boardPosition[currx+1][curry] == "none" && checkedArray[currx+1][curry] == 0){
+              liberties ++;
+            }
+            checkedArray[currx+1][curry] = 1;
+          }
+          if(curry > 0){
+            if(boardPosition[currx][curry-1] == color && checkedArray[currx][curry-1] == 0){
+              groupMembers.push([currx,curry-1]);
+              toBeCheckedStack.push([currx,curry-1]);
+            }
+            if(boardPosition[currx][curry-1] == "none" && checkedArray[currx][curry-1] == 0){
+              liberties ++;
+            }
+            checkedArray[currx][curry-1] = 1;
+          }
+          if(curry < (boardPosition.length - 1)){
+            if(boardPosition[currx][curry+1] == color && checkedArray[currx][curry+1] == 0){
+              groupMembers.push([currx,curry+1]);
+              toBeCheckedStack.push([currx,curry+1]);
+            }
+            if(boardPosition[currx][curry+1] == "none" && checkedArray[currx][curry+1] == 0){
+              liberties ++;
+            }
+            checkedArray[currx][curry+1] = 1;
+          }
+        }
+        return [liberties,groupMembers];
       }
       function evaluateMove(boardPosition,prevBoardPosition,move){
         //move is GameMove object.
@@ -411,10 +476,52 @@
             ret[i].push(boardPosition[i][j]);
           }
         }
+        retKey = "valid";
         if(move.x != null && move.y != null){
-          ret[move.x][move.y] = move.whoMoved;
+          if(ret[move.x][move.y] != "none"){
+            retKey = "occupied";
+          }
+          else{
+            //checking liberties of surrounding groups.
+            var groupsToBeRemoved = []
+            suicideFlag = 0;
+            surroundings = [[0,-1],[0,1],[1,0],[-1,0]];
+            for (var i = 0;  i < 4; i++){
+              var x = move.x + surroundings[i][0];
+              var y = move.y + surroundings[i][1];
+              if(x >= 0 && y >=0 && x < boardPosition.length && y < boardPosition.length){
+                if(boardPosition[x][y] == move.whoMoved){
+                  retArr = countLiberties([x,y],boardPosition);
+                  if(retArr[0] <= 1){
+                    suicideFlag = 1;
+                  }
+                }
+                else if(boardPosition[x][y] == otherPlayer(move.whoMoved)){
+                  retArr = countLiberties([x,y],boardPosition);
+                  console.log([x,y]);
+                  console.log(retArr);
+                  if(retArr[0] <= 1){
+                    groupsToBeRemoved = groupsToBeRemoved.concat(retArr[1]);
+                  }
+                }
+              }
+            }
+            if(groupsToBeRemoved.length > 0){
+              for(var i = 0; i < groupsToBeRemoved.length; i++){
+                ret[groupsToBeRemoved[i][0]][groupsToBeRemoved[i][1]] = "none";
+              }
+              ret[move.x][move.y] = move.whoMoved;
+            }
+            else if(suicideFlag == 1){
+              retKey = "suicidalMove";
+            }
+            else{
+              ret[move.x][move.y] = move.whoMoved;
+            }
+          }
         }
-        return ["valid",ret];
+        console.log(ret);
+        return [retKey,ret];
       }
       //the object definitions, the biggest reason for the refactor
       function GameState(boardPosition,prevBoardPosition,whoseMove){
@@ -444,14 +551,15 @@
         this.moveNumber = 0;
 
         this.makeMove = function(move){
-          var retList = evaluateMove(this.boardPosition,this.prevBoardPosition,move);
+          var retList = evaluateMove(this.gameStates[this.moveNumber].boardPosition,this.gameStates[this.moveNumber].prevBoardPosition,move);
           var isNewMove = true;
           if(retList[0] == "valid" && isNewMove){
-            var newGameState = new GameState(retList[1],this.BoardPosition,prevBoardPosition,otherPlayer(move.whoMoved));
-            this.gameTree[this.moveNumber].append(gameTree.length);
+            var newGameState = new GameState(retList[1],this.gameStates[this.moveNumber].boardPosition,otherPlayer(move.whoMoved));
+            this.gameTree[this.moveNumber].push(this.gameTree.length);
             this.gameTree.push([]);
             this.gameStates.push(newGameState);
             this.gameMoves.push(move);
+            this.moveNumber = this.gameMoves.length - 1;
           }
         }
       }
@@ -461,13 +569,33 @@
 
       //response functions
       function mouseEnter(){
-        var pass = 1+1;
+        i = this[0];
+        j = this[1];
+        var boardPosition = currentGame.gameStates[currentGame.moveNumber].boardPosition;
+        var whoseMove = currentGame.gameStates[currentGame.moveNumber].whoseMove;
+        if(boardPosition[i][j] == "none"){
+          elt = document.getElementById("circle" + i.toString() + "by" + j.toString()).children[0];
+          elt.setAttributeNS(null,"fill",whoseMove);
+        }
       }
       function mouseLeave(){
-        var pass = 1+1;
+        i = this[0];
+        j = this[1];
+        elt = document.getElementById("circle" + i.toString() + "by" + j.toString()).children[0];
+        var boardPosition = currentGame.gameStates[currentGame.moveNumber].boardPosition;
+        var whoseMove = currentGame.gameStates[currentGame.moveNumber].whoseMove;
+        if(boardPosition[i][j] == "none"){
+          elt.setAttributeNS(null,"fill","none");
+        }
+        else{
+          elt.setAttributeNS(null,"fill",boardPosition[i][j])
+        }
       }
       function mouseClick(){
-        var pass = 1+1;
+        i = this[0];
+        j = this[1];
+        currentGame.makeMove(new GameMove(i,j,currentGame.gameStates[currentGame.moveNumber].whoseMove));
+        drawBoardCaller();
       }
       //putting stuff in motion
       function drawBoardCaller(){
