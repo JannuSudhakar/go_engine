@@ -399,7 +399,7 @@
       }
 
       function countLiberties(startCoordinates,boardPosition){
-        var color = boardPosition[startCoordinates[0],startCoordinates[1]];
+        var color = boardPosition[startCoordinates[0]][startCoordinates[1]];
         var checkedArray = []
         var groupMembers = [[startCoordinates[0],startCoordinates[1]]];
         var toBeCheckedStack = [startCoordinates];
@@ -410,10 +410,9 @@
             checkedArray[i].push(0);
           }
         }
-        checkedArray[startCoordinates[0],startCoordinates[1]] = 1;
+        checkedArray[startCoordinates[0]][startCoordinates[1]] = 1;
         while(toBeCheckedStack.length > 0){
           var currx = toBeCheckedStack.pop();
-          console.log(currx);
           var curry = currx[1];
           currx = currx[0];
           if(currx > 0){
@@ -484,22 +483,13 @@
           else{
             //checking liberties of surrounding groups.
             var groupsToBeRemoved = []
-            suicideFlag = 0;
             surroundings = [[0,-1],[0,1],[1,0],[-1,0]];
             for (var i = 0;  i < 4; i++){
               var x = move.x + surroundings[i][0];
               var y = move.y + surroundings[i][1];
               if(x >= 0 && y >=0 && x < boardPosition.length && y < boardPosition.length){
-                if(boardPosition[x][y] == move.whoMoved){
+                if(boardPosition[x][y] == otherPlayer(move.whoMoved)){
                   retArr = countLiberties([x,y],boardPosition);
-                  if(retArr[0] <= 1){
-                    suicideFlag = 1;
-                  }
-                }
-                else if(boardPosition[x][y] == otherPlayer(move.whoMoved)){
-                  retArr = countLiberties([x,y],boardPosition);
-                  console.log([x,y]);
-                  console.log(retArr);
                   if(retArr[0] <= 1){
                     groupsToBeRemoved = groupsToBeRemoved.concat(retArr[1]);
                   }
@@ -512,15 +502,34 @@
               }
               ret[move.x][move.y] = move.whoMoved;
             }
-            else if(suicideFlag == 1){
-              retKey = "suicidalMove";
-            }
             else{
               ret[move.x][move.y] = move.whoMoved;
+              var suicideCheck = countLiberties([move.x,move.y],ret);
+              if(suicideCheck[0] == 0){
+                retKey = "suicidalMove";
+                ret[move.x][move.y] = "none";
+              }
             }
           }
         }
-        console.log(ret);
+        if(retKey == "valid"){
+          isKo = true;
+          for (var i = 0; i < boardPosition.length; i++){
+            for ( var j = 0; j < boardPosition.length; j++){
+              isKo = (isKo && (prevBoardPosition[i][j] == ret[i][j]))
+            }
+          }
+          if(isKo){
+            retKey = "koViolation";
+            ret = [];
+            for (var i = 0; i < boardPosition.length; i++){
+              ret.push([]);
+              for (var j = 0; j < boardPosition.length; j++){
+                ret[i].push(boardPosition[i][j]);
+              }
+            }
+          }
+        }
         return [retKey,ret];
       }
       //the object definitions, the biggest reason for the refactor
