@@ -377,12 +377,126 @@
         point = document.getElementById("star16x16");
         point.style.top = k16+"px";
         point.style.left = k16+"px";
-        displayGameTree();
+        displayGameTree(currentGame);
         //console.log("currNode from drawBoard: " + currNode.toString());
       }
 
-      function displayGameTree(){
-        var pass = 1+1;
+      function setBoardPositionButtonClick(){
+        currentGame.moveNumber = this;
+        drawBoardCaller();
+        //currNode = this;
+        //setBoardPositionFromTree(this);
+      }
+
+      function displayGameTree(game){
+        var gameTree = game.gameTree;
+        var currNode = game.moveNumber;
+        var treeDiv = document.getElementById("treeNavigator");
+        while(treeDiv.hasChildNodes()){
+          treeDiv.removeChild(treeDiv.lastChild);
+        }
+        gameTreeCoordinatesX = [];
+        gameTreeCoordinatesY = [];
+        for(var i = 0;  i < gameTree.length; i++){
+          gameTreeCoordinatesX.push(0);
+          gameTreeCoordinatesY.push(0);
+        }
+        var rootButton = document.createElement("button");
+        t = document.createTextNode("0");
+        rootButton.appendChild(t);
+        rootButton.style.borderRadius = "50%";
+        rootButton.style.margin = "5px";
+        rootButton.style.backgroundColor = "gray";
+        rootButton.style.height = "30px";
+        rootButton.style.width = "30px";
+        rootButton.style.textAlign = "center";
+        rootButton.style.padding = "0px";
+        rootButton.style.postion = "absolute";
+        rootButton.style.top = "0px";
+        rootButton.style.left = "0px";
+        if(currNode == 0){
+          //rootButton.style.borderWidth = "10px";
+          rootButton.style.borderColor = "lightGray";
+          rootButton.style.borderRadius = "0%";
+        }
+        rootButton.id = "0node";
+        rootButton.addEventListener("click",setBoardPositionButtonClick.bind(0));
+        treeDiv.appendChild(rootButton);
+        //breadth first search through the game tree;
+        var queue = gameTree[0];
+        var parentx = [];
+        var parenty = [];
+        for (var i = 0; i < queue.length; i++){
+          parentx.push(0);
+          parenty.push(0);
+        }
+        var gameDepth = 0;
+        var y = 0;
+        while(queue.length > 0){
+          gameDepth ++;
+          var nextQueue = [];
+          var nextParentx = [];
+          var nextParenty = [];
+          var y = 0;
+          for(var i = 0; i < queue.length; i++){
+            y = Math.max(y,parenty[i]);
+            gameTreeCoordinatesX[queue[i]] = gameDepth;
+            gameTreeCoordinatesY[queue[i]] = y;
+            for(var j = 0; j < gameTree[queue[i]].length; j++){
+              nextQueue.push(gameTree[queue[i]][j]);
+              nextParentx.push(gameDepth);
+              nextParenty.push(y);
+            }
+            B = document.createElement("button");
+            t = document.createTextNode(gameDepth.toString());
+            B.appendChild(t);
+            B.style.borderRadius = "50%";
+            B.style.margin = "5px";
+            B.style.backgroundColor = otherPlayer(game.gameStates[queue[i]].whoseMove);
+            if(otherPlayer(game.gameStates[queue[i]].whoseMove) == "black"){
+              B.style.color = "white";
+            }
+            B.style.height = "30px";
+            B.style.width = "30px";
+            B.style.padding = "0px";
+            B.style.position = "absolute";
+            B.style.top = (40*y).toString() + "px";
+            B.style.left = (40*gameDepth).toString() + "px";
+            if(currNode == queue[i]){
+              //B.style.border = "10px";
+              B.style.borderColor = "gray";
+              B.style.borderRadius = "0%";
+            }
+            B.addEventListener("click",setBoardPositionButtonClick.bind(queue[i]));
+            B.id = queue[i] + "node";
+            treeDiv.appendChild(B);
+            trailTop = 40*parenty[i] + 18;
+            trailLeft = 40*parentx[i] + 18;
+            trailHeight = y-parenty[i];
+            var trail = document.createElementNS("http://www.w3.org/2000/svg","svg");
+            var element = document.createElementNS("http://www.w3.org/2000/svg","line");
+            element.setAttributeNS(null,"x1",2);
+            element.setAttributeNS(null,"y1",2);
+            element.setAttributeNS(null,"x2",42);
+            element.setAttributeNS(null,"y2",2+trailHeight*40);
+            element.setAttributeNS(null,"stroke","black");
+            trail.style.width = "44px";
+            trail.style.height = (trailHeight*40 + 4).toString() + "px";
+            trail.style.position = "absolute";
+            trail.style.top = trailTop.toString() + "px";
+            trail.style.left = trailLeft.toString() + "px";
+            trail.style.zIndex = "-1";
+            trail.appendChild(element);
+            treeDiv.appendChild(trail);
+            y++;
+          }
+          queue = nextQueue;
+          parentx = nextParentx;
+          parenty = nextParenty;
+          //console.log(parenty);
+        }
+        currentGame.gameTreeCoordinatesX = gameTreeCoordinatesX;
+        currentGame.gameTreeCoordinatesY = gameTreeCoordinatesY;
       }
 
       //functions to do the heaviest lifting
@@ -558,6 +672,8 @@
         this.gameMoves = [new GameMove(null,null,"white")];
         this.gameTree = [[]];
         this.moveNumber = 0;
+        this.gameTreeCoordinatesX = [0];
+        this.gameTreeCoordinatesY = [0];
 
         this.makeMove = function(move){
           var retList = evaluateMove(this.gameStates[this.moveNumber].boardPosition,this.gameStates[this.moveNumber].prevBoardPosition,move);
@@ -612,6 +728,60 @@
       }
       drawBoardCaller();
       window.addEventListener("resize",drawBoardCaller);
+
+      function keyPress(e){
+        //console.log(e.key);
+        if(e.key == "ArrowRight"){
+          if(currentGame.gameTree[currentGame.moveNumber].length > 0){
+            currentGame.moveNumber = currentGame.gameTree[currentGame.moveNumber][0];
+            //setBoardPositionFromTree(currNode);
+            drawBoardCaller();
+          }
+        }
+        if(e.key == "ArrowLeft"){
+          for(var i = 0; i < currentGame.gameTree.length; i++){
+            if(currentGame.gameTree[i].indexOf(currentGame.moveNumber) > -1){
+              currentGame.moveNumber = i;
+              //setBoardPositionFromTree(currNode);
+              drawBoardCaller();
+              continue;
+            }
+          }
+        }
+        if(e.key == "ArrowDown"){
+          sameXIndex = [];
+          sameX_Y = [];
+          for(var i = 0; i < gameTreeCoordinatesX.length; i++){
+            if(gameTreeCoordinatesX[i] == gameTreeCoordinatesX[currNode] && gameTreeCoordinatesY[i] > gameTreeCoordinatesY[currNode]){
+              sameXIndex.push(i);
+              sameX_Y.push(gameTreeCoordinatesY[i]);
+            }
+          }
+          if(sameXIndex.length>0){
+            currNode = sameXIndex[sameX_Y.indexOf(Math.min.apply(null,sameX_Y))];
+            setBoardPositionFromTree(currNode);
+            drawBoard();
+          }
+        }
+        if(e.key == "ArrowUp"){
+          sameXIndex = [];
+          sameX_Y = [];
+          //console.log(currNode);
+          for(var i = 0; i < currentGame.gameTreeCoordinatesX.length; i++){
+            if(currentGame.gameTreeCoordinatesX[i] == currentGame.gameTreeCoordinatesX[currentGame.moveNumber] && currentGame.gameTreeCoordinatesY[i] < currentGame.gameTreeCoordinatesY[currentGame.moveNumber]){
+              sameXIndex.push(i);
+              sameX_Y.push(currentGame.gameTreeCoordinatesY[i]);
+            }
+          }
+          if(sameXIndex.length>0){
+            currentGame.moveNumber = sameXIndex[sameX_Y.indexOf(Math.max.apply(null,sameX_Y))];
+            //setBoardPositionFromTree(currNode);
+            drawBoardCaller();
+          }
+        }
+      }
+
+      document.onkeydown = keyPress;
 
       //everything below this is before refactoring
       /*var whoseMove = "black";
